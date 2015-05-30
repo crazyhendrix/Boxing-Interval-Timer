@@ -7,12 +7,10 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TimePicker;
 
-import com.eightbitdreams.boxingintervaltimer.R;
-
 import java.sql.Time;
 
 /**
- * Created by thon on 29/5/15.
+ * Created by "8-Bit Dreams" on 29/5/15.
  */
 public class TimePreference extends DialogPreference{
     private int lastMinute = 0;

@@ -1,13 +1,10 @@
 package com.eightbitdreams.boxingintervaltimer;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 
-import com.eightbitdreams.boxingintervaltimer.R;
-
 /**
- * Created by thon on 29/5/15.
+ * Created by "8-Bit Dreams" on 29/5/15.
  */
 public class SettingsActivity extends PreferenceActivity {
     @Override

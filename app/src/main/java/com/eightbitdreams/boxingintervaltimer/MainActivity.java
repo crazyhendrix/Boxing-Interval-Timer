@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
@@ -13,8 +16,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.eightbitdreams.boxingintervaltimer.R;
 
 import java.util.concurrent.TimeUnit;
 
@@ -34,6 +35,10 @@ public class MainActivity extends Activity {
 
     private Counter workTimer, restTimer, prepTimer;
 
+    private SoundPool soundPool;
+    private boolean loaded, alertPlayed;
+    private int soundAlertId, soundBellId;
+
     SharedPreferences sp;
 
     // TempTimer object for pausing and resuming
@@ -44,8 +49,20 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         sp = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // Sets the hardware button to control music
+//        this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        soundPool = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
+        soundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+            @Override
+            public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+                loaded = true;
+            }
+        });
+        soundAlertId = soundPool.load(this, R.raw.bit_alert, 1);
+        soundBellId = soundPool.load(this, R.raw.bit_bell, 1);
 
         roundCurrent = 1;
 
@@ -84,6 +101,7 @@ public class MainActivity extends Activity {
                     workTimer.start();
                     setTextViewTimeColor();
                     buttonRun.setText(R.string.pause);
+                    playBellSound();
                 } else {
                     // TODO Something is wrong when reset, and restart timer again
                     if (!running) {
@@ -195,6 +213,26 @@ public class MainActivity extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    private void playAlertSound() {
+        AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        float actualVolume = (float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        float maxVolume = (float) audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        float volume = actualVolume / maxVolume;
+        if (loaded) {
+            soundPool.play(soundAlertId, volume, volume, 1, 0, 1f);
+        }
+    }
+
+    private void playBellSound() {
+        AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        float actualVolume = (float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        float maxVolume = (float) audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        float volume = actualVolume / maxVolume;
+        if (loaded) {
+            soundPool.play(soundBellId, volume, volume, 1, 0, 1f);
+        }
+    }
     // TODO Clean up code : set restTimer/WorkTimer to null
 
     private void restTimerPause() {
@@ -291,6 +329,7 @@ public class MainActivity extends Activity {
         workTimeMillis = TimePreference.getMillis(sp.getString("round_time_key", "3:00"));
         restTimeMillis = TimePreference.getMillis(sp.getString("rest_time_key", "1:00"));
         intervalMillis = 1000;
+        alertPlayed = false;
         prep = sp.getBoolean("prep_time_key", true);
         prepTimeMillis = 10000;
         if (prep) {
@@ -328,6 +367,7 @@ public class MainActivity extends Activity {
                 ms = runTime;
                 workTimer = new Counter(workTimeMillis, intervalMillis);
                 workTimer.start();
+                playBellSound();
                 setTextViewTimeColor();
             } else if (state == State.REST && roundCurrent < roundsTotal) {
                 ++roundCurrent;
@@ -341,6 +381,8 @@ public class MainActivity extends Activity {
                 setTextViewTimeColor();
                 workTimer = new Counter(workTimeMillis, intervalMillis);
                 workTimer.start();
+                alertPlayed = false;
+                playBellSound();
             } else if (state == State.WORK && roundCurrent < roundsTotal) {
                 if (workTimer != null) {
                     workTimer.cancel();
@@ -353,6 +395,8 @@ public class MainActivity extends Activity {
                     ms = restTime;
                     restTimer = new Counter(restTimeMillis, intervalMillis);
                     restTimer.start();
+                    alertPlayed = false;
+                    playBellSound();
                 } else {
                     ++roundCurrent;
                     state = State.WORK;
@@ -361,10 +405,14 @@ public class MainActivity extends Activity {
                     setTextViewTimeColor();
                     workTimer = new Counter(workTimeMillis, intervalMillis);
                     workTimer.start();
+                    alertPlayed = false;
+                    playBellSound();
                 }
             } else if (roundCurrent == roundsTotal) {
                 textViewTime.setText("DONE!");
                 state = State.DONE;
+                alertPlayed = false;
+                playBellSound();
                 setRoundTextView();
                 setTextViewTimeColor();
                 running = false;
@@ -388,6 +436,11 @@ public class MainActivity extends Activity {
             ms = String.format("%02d:%02d", mins, secs);
             setTextViewTimeWarnPrep(millisLeft);
             // System.out.println(ms);
+            if (millisLeft <= endRoundWarnMillis && !alertPlayed && state == State.WORK
+                    || (millisLeft <= prepTimeMillis && state == State.REST && !alertPlayed)) {
+                playAlertSound();
+                alertPlayed = true;
+            }
             textViewTime.setText(ms);
         }
 
