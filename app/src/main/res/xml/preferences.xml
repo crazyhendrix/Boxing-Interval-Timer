@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="Timer Settings">
+        <com.eightbitdreams.boxingintervaltimer.TimePreference
+            android:key="round_time_key"
+            android:title="@string/round_time_title"
+            android:defaultValue="3:00" />
+        <com.eightbitdreams.boxingintervaltimer.TimePreference
+            android:key="rest_time_key"
+            android:title="@string/rest_time_title"
+            android:defaultValue="1:00"/>
+        <CheckBoxPreference android:key="prep_time_key"
+            android:title="@string/prep_time_title"
+            android:summary="@string/prep_time_summary"
+            android:defaultValue="true"/>
+        <ListPreference
+            android:key="warn_time_key"
+            android:title="@string/warn_time_title"
+            android:summary="@string/warn_time_summary"
+            android:entries="@array/warn_time"
+            android:entryValues="@array/warn_time_values"
+            android:defaultValue="20" />
+        <EditTextPreference
+            android:key="number_rounds_key"
+            android:title="@string/num_round_title"
+            android:numeric="integer"
+            android:defaultValue="12"/>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Phone Settings">
+        <CheckBoxPreference
+            android:key="keep_awake_key"
+            android:title="@string/keep_awake_title"
+            android:defaultValue="true"
+            android:summary="@string/keep_awake_summary"/>
+        <CheckBoxPreference
+            android:key="motion_sensor_key"
+            android:title="@string/motion_sensor_title"
+            android:defaultValue="true"
+            android:summary="@string/motion_sensor_summary"/>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Others">
+        <!-- Email Developer -->
+    </PreferenceCategory>
+</PreferenceScreen>

@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">Boxing Interval Timer</string>
+    <string name="app_settings_name">Settings</string>
+    <string name="initial_time">00:00</string>
+    <string name="action_settings">Settings</string>
+    <string name="round">ROUND</string>
+    <string name="round_number">1/12</string>
+    <string name="work">WORK</string>
+    <string name="pause">PAUSE</string>
+    <string name="reset">RESET</string>
+    <string name="settings">SETTINGS</string>
+    <string name="set">Set</string>
+    <string name="cancel">Cancel</string>
+    <string name="round_time_title">Round Time</string>
+    <string name="rest_time_title">Rest Time</string>
+    <string name="keep_awake_title">Keep Awake</string>
+    <string name="motion_sensor_title">Motion Sensor</string>
+    <string name="num_round_title">Number of Rounds</string>
+    <string name="keep_awake_summary">Keep screen awake</string>
+    <string name="motion_sensor_summary">Run/Pause with motion sensor</string>
+    <string name="warn_time_title">Warning Time</string>
+    <string name="warn_time_summary">Alert time before round ends</string>
+    <string name="stop_toast">Please stop timer first</string>
+    <string name="prep_time_title">Preparation Time</string>
+    <string name="prep_time_summary">Check for 10 seconds prep before timer starts</string>
+</resources>

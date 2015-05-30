@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="warn_time">
+        <item name="0">no warning</item>
+        <item name="10">10 seconds</item>
+        <item name="20">20 seconds</item>
+        <item name="30">30 seconds</item>
+    </string-array>
+    <string-array name="warn_time_values">
+        <item name="0">0</item>
+        <item name="10">10</item>
+        <item name="20">20</item>
+        <item name="30">30</item>
+    </string-array>
+</resources>
