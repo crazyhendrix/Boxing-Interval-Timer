@@ -16,8 +16,14 @@ Version 1.0
 
 - Added Sounds for alerts and end of round.
 - App remembers what your settings are.
+- Vibrates when Round ends
+- When wearing gloves, user can start/pause using the proximity sensor
 
 ## Additional Information ##
 
 - Requires Vibration, Phone State(for answering calls and pausing the timer) permission
 - Requires Android 4.0.3 and above.
+
+## Bug-fix ##
+
+- when user presses home button, timer does not restart now.

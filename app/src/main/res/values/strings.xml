@@ -14,13 +14,15 @@
     <string name="round_time_title">Round Time</string>
     <string name="rest_time_title">Rest Time</string>
     <string name="keep_awake_title">Keep Awake</string>
-    <string name="motion_sensor_title">Motion Sensor</string>
     <string name="num_round_title">Number of Rounds</string>
     <string name="keep_awake_summary">Keep screen awake</string>
-    <string name="motion_sensor_summary">Run/Pause with motion sensor</string>
+    <string name="proximity_sensor_title">Proximity Sensor</string>
+    <string name="proximity_sensor_summary">Run/Pause with proximity sensor(useful when wearing gloves</string>
     <string name="warn_time_title">Warning Time</string>
     <string name="warn_time_summary">Alert time before round ends</string>
     <string name="stop_toast">Please stop timer first</string>
     <string name="prep_time_title">Preparation Time</string>
     <string name="prep_time_summary">Check for 10 seconds prep before timer starts</string>
+    <string name="mute_title">Mute Sounds</string>
+    <string name="mute_summary">No sounds when checked</string>
 </resources>

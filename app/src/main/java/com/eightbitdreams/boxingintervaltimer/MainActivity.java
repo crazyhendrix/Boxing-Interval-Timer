@@ -4,11 +4,15 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,13 +24,14 @@ import android.widget.Toast;
 import java.util.concurrent.TimeUnit;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements SensorEventListener{
     private TextView textViewTime;
     private TextView textViewRounds;
     private Button buttonRun, buttonReset, buttonSettings;
     private boolean running = false, prep;
     private String runTime, restTime;
     private long workTimeMillis, restTimeMillis, intervalMillis, prepTimeMillis, endRoundWarnMillis;
+
     private enum State {
         REST, WORK, PREP, DONE
     };
@@ -36,13 +41,61 @@ public class MainActivity extends Activity {
     private Counter workTimer, restTimer, prepTimer;
 
     private SoundPool soundPool;
-    private boolean loaded, alertPlayed;
+    private boolean loaded, alertPlayed, mute, proximity;
     private int soundAlertId, soundBellId;
 
     SharedPreferences sp;
+    private Vibrator v;
+    private long[] vPattern = {0, 300, 100, 300, 100, 300};
+    private SensorManager sensorManager;
+    private Sensor proximitySensor;
 
     // TempTimer object for pausing and resuming
     private long tempMillisLeft = 0;
+    // SensorEventListener Override Methods
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.values[0] == 0 && proximity) {
+            if (prepTimer == null && roundCurrent == 1 && state == State.PREP) {
+                prepTimer = new Counter(prepTimeMillis, intervalMillis);
+                running = true;
+                prepTimer.start();
+                setTextViewTimeColor();
+                buttonRun.setText(R.string.pause);
+            } else if (workTimer == null && roundCurrent == 1 && state == State.WORK) {
+                workTimer = new Counter(workTimeMillis, intervalMillis);
+                running = true;
+                workTimer.start();
+                setTextViewTimeColor();
+                buttonRun.setText(R.string.pause);
+                playBellSoundVibrate();
+            } else {
+                if (!running) {
+                    if (state == State.WORK) {
+                        workTimerResume();
+                    } else if (state == State.REST){
+                        restTimerResume();
+                    } else if (state == State.PREP) {
+                        prepTimerResume();
+                    }
+                } else {
+                    if (state == State.WORK) {
+                        workTimerPause();
+                    } else if (state == State.REST) {
+                        restTimerPause();
+                    } else if (state == State.PREP) {
+                        prepTimerPause();
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +104,8 @@ public class MainActivity extends Activity {
 
         sp = PreferenceManager.getDefaultSharedPreferences(this);
 
-        // Sets the hardware button to control music
-//        this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        // Sets the hardware button to control music volume
+        this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         soundPool = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
         soundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
@@ -66,18 +119,11 @@ public class MainActivity extends Activity {
 
         roundCurrent = 1;
 
-        // Sets the round time and rest time
-//        try {
-//            workTimeMillis = TimePreference.getMillis(sp.getString("round_time_key", "3:00"));
-//            restTimeMillis = TimePreference.getMillis(sp.getString("rest_time_key", "1:00"));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        workTimeMillis = 180000;
-//        restTimeMillis = 60000;
-//        workTimeMillis = (TimePreference.getMinute(sp.getString("round_time_key", "3:00")) * 60 * 1000) +
-//                (TimePreference.getSecond(sp.getString("round_time_key", "3:00")) * 1000);
+        // Load shared preferences
         loadPreferences(sp);
+
+        // Initialize Vibration on phone
+        v = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
 
         textViewTime = (TextView) findViewById(R.id.time_left_textView);
         textViewTime.setText(runTime);
@@ -96,14 +142,12 @@ public class MainActivity extends Activity {
                     buttonRun.setText(R.string.pause);
                 } else if (workTimer == null && roundCurrent == 1 && state == State.WORK) {
                     workTimer = new Counter(workTimeMillis, intervalMillis);
-//                    state = State.WORK;
                     running = true;
                     workTimer.start();
                     setTextViewTimeColor();
                     buttonRun.setText(R.string.pause);
-                    playBellSound();
+                    playBellSoundVibrate();
                 } else {
-                    // TODO Something is wrong when reset, and restart timer again
                     if (!running) {
                         if (state == State.WORK) {
                             workTimerResume();
@@ -167,6 +211,7 @@ public class MainActivity extends Activity {
                 } else {
                     Intent i = new Intent(MainActivity.this, SettingsActivity.class);
                     startActivity(i);
+                    finish();
                 }
             }
         });
@@ -174,22 +219,39 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onResume() {
+        // TODO Buggy here. If home button pressed, Timer is reseted
+        // Better to put this under when SettingsActivity is called.
         super.onResume();
-        if (workTimer != null) {
-            workTimer.cancel();
-            workTimer = null;
+//        if (proximity) {
+//            sensorManager.registerListener(this, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
+//        }
+//        if (workTimer != null) {
+//            workTimer.cancel();
+//            workTimer = null;
+//        }
+//        if (restTimer != null) {
+//            restTimer.cancel();
+//            restTimer = null;
+//        }
+//        if (prepTimer != null) {
+//            prepTimer.cancel();
+//            prepTimer = null;
+//        }
+//        loadPreferences(sp);
+//        roundCurrent = 1;
+//        setRoundTextView();
+//        running = false;
+//        buttonRun.setText(R.string.work);
+//        textViewTime.setText(runTime);
+//        setTextViewTimeColor();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (proximity) {
+            sensorManager.unregisterListener(this);
         }
-        if (restTimer != null) {
-            restTimer.cancel();
-            restTimer = null;
-        }
-        loadPreferences(sp);
-        roundCurrent = 1;
-        setRoundTextView();
-        running = false;
-        buttonRun.setText(R.string.work);
-        textViewTime.setText(runTime);
-        setTextViewTimeColor();
     }
 
     @Override
@@ -219,19 +281,20 @@ public class MainActivity extends Activity {
         float actualVolume = (float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
         float maxVolume = (float) audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         float volume = actualVolume / maxVolume;
-        if (loaded) {
+        if (loaded && !mute) {
             soundPool.play(soundAlertId, volume, volume, 1, 0, 1f);
         }
     }
 
-    private void playBellSound() {
+    private void playBellSoundVibrate() {
         AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         float actualVolume = (float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
         float maxVolume = (float) audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         float volume = actualVolume / maxVolume;
-        if (loaded) {
+        if (loaded && !mute) {
             soundPool.play(soundBellId, volume, volume, 1, 0, 1f);
         }
+        v.vibrate(vPattern, -1);
     }
     // TODO Clean up code : set restTimer/WorkTimer to null
 
@@ -325,9 +388,15 @@ public class MainActivity extends Activity {
     }
 
     private void loadPreferences(SharedPreferences sp) {
+        proximity = sp.getBoolean("proximity_sensor_key", true);
+        if (proximity) {
+            sensorManager = (SensorManager) this.getSystemService(SENSOR_SERVICE);
+            proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        }
         roundsTotal = Integer.parseInt(sp.getString("number_rounds_key", "12"));
         workTimeMillis = TimePreference.getMillis(sp.getString("round_time_key", "3:00"));
         restTimeMillis = TimePreference.getMillis(sp.getString("rest_time_key", "1:00"));
+        mute = sp.getBoolean("mute_key", false);
         intervalMillis = 1000;
         alertPlayed = false;
         prep = sp.getBoolean("prep_time_key", true);
@@ -367,7 +436,7 @@ public class MainActivity extends Activity {
                 ms = runTime;
                 workTimer = new Counter(workTimeMillis, intervalMillis);
                 workTimer.start();
-                playBellSound();
+                playBellSoundVibrate();
                 setTextViewTimeColor();
             } else if (state == State.REST && roundCurrent < roundsTotal) {
                 ++roundCurrent;
@@ -382,7 +451,7 @@ public class MainActivity extends Activity {
                 workTimer = new Counter(workTimeMillis, intervalMillis);
                 workTimer.start();
                 alertPlayed = false;
-                playBellSound();
+                playBellSoundVibrate();
             } else if (state == State.WORK && roundCurrent < roundsTotal) {
                 if (workTimer != null) {
                     workTimer.cancel();
@@ -396,7 +465,7 @@ public class MainActivity extends Activity {
                     restTimer = new Counter(restTimeMillis, intervalMillis);
                     restTimer.start();
                     alertPlayed = false;
-                    playBellSound();
+                    playBellSoundVibrate();
                 } else {
                     ++roundCurrent;
                     state = State.WORK;
@@ -406,13 +475,13 @@ public class MainActivity extends Activity {
                     workTimer = new Counter(workTimeMillis, intervalMillis);
                     workTimer.start();
                     alertPlayed = false;
-                    playBellSound();
+                    playBellSoundVibrate();
                 }
             } else if (roundCurrent == roundsTotal) {
                 textViewTime.setText("DONE!");
                 state = State.DONE;
                 alertPlayed = false;
-                playBellSound();
+                playBellSoundVibrate();
                 setRoundTextView();
                 setTextViewTimeColor();
                 running = false;

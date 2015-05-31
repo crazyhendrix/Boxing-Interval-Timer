@@ -27,9 +27,18 @@
         <activity android:name="com.eightbitdreams.boxingintervaltimer.SettingsActivity"
             android:label="@string/app_settings_name"
             android:screenOrientation="portrait">
-
         </activity>
+        <!--<activity android:name=".EmailDeveloper"-->
+            <!--android:label="Email Developer"-->
+            <!--android:launchMode="singleTop"-->
+            <!--android:screenOrientation="portrait"-->
+            <!--android:configChanges="keyboardHidden|orientation">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="com.eightbitnightmare.boxingintervaltimer.EmailDeveloper"/>-->
+                <!--<category android:name="android.intent.category.DEFAULT"/>-->
+            <!--</intent-filter>-->
 
+        <!--</activity>-->
         <!-- Declare the Vibrate Service -->
         <service android:name=".VibrateService"/>
     </application>

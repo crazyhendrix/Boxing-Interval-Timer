@@ -26,6 +26,10 @@
             android:title="@string/num_round_title"
             android:numeric="integer"
             android:defaultValue="12"/>
+        <CheckBoxPreference android:key="mute_key"
+            android:defaultValue="false"
+            android:title="@string/mute_title"
+            android:summary="@string/mute_summary"/>
     </PreferenceCategory>
     <PreferenceCategory
         android:title="Phone Settings">
@@ -35,13 +39,20 @@
             android:defaultValue="true"
             android:summary="@string/keep_awake_summary"/>
         <CheckBoxPreference
-            android:key="motion_sensor_key"
-            android:title="@string/motion_sensor_title"
+            android:key="proximity_sensor_key"
+            android:title="@string/proximity_sensor_title"
             android:defaultValue="true"
-            android:summary="@string/motion_sensor_summary"/>
+            android:summary="@string/proximity_sensor_summary"/>
     </PreferenceCategory>
     <PreferenceCategory
         android:title="Others">
-        <!-- Email Developer -->
+        <Preference android:key="mailTo"
+            android:title="Send Bug to Developer"
+            android:summary="report errors to me. :)"/>
+        <!--<PreferenceScreen-->
+            <!--android:title="Email Developer"-->
+            <!--android:summary="Send bug report via email">-->
+        <!--</PreferenceScreen>-->
+
     </PreferenceCategory>
 </PreferenceScreen>
