@@ -3,7 +3,6 @@ package com.eightbitdreams.boxingintervaltimer;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -18,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class MainActivity extends Activity implements SensorEventListener{
     private TextView textViewTime;
     private TextView textViewRounds;
+    private LinearLayout timeLeftPanel;
     private Button buttonRun, buttonReset, buttonSettings;
     private boolean running = false, prep;
     private String runTime, restTime;
@@ -124,7 +125,7 @@ public class MainActivity extends Activity implements SensorEventListener{
 
         // Initialize Vibration on phone
         v = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
-
+        timeLeftPanel = (LinearLayout) findViewById(R.id.time_panel);
         textViewTime = (TextView) findViewById(R.id.time_left_textView);
         textViewTime.setText(runTime);
         textViewRounds = (TextView) findViewById(R.id.round_number);
@@ -175,18 +176,7 @@ public class MainActivity extends Activity implements SensorEventListener{
                 if (running) {
                     Toast.makeText(MainActivity.this, R.string.stop_toast, Toast.LENGTH_SHORT).show();
                 } else {
-                    if (restTimer != null) {
-                        restTimer.cancel();
-                        restTimer = null;
-                    }
-                    if (workTimer != null) {
-                        workTimer.cancel();
-                        workTimer = null;
-                    }
-                    if (prepTimer != null) {
-                        prepTimer.cancel();
-                        prepTimer = null;
-                    }
+                    cancelNullTimers();
                     tempMillisLeft = workTimeMillis;
                     roundCurrent = 1;
                     setRoundTextView();
@@ -217,26 +207,28 @@ public class MainActivity extends Activity implements SensorEventListener{
         });
     }
 
+    public void cancelNullTimers() {
+        if (restTimer != null) {
+            restTimer.cancel();
+            restTimer = null;
+        }
+        if (workTimer != null) {
+            workTimer.cancel();
+            workTimer = null;
+        }
+        if (prepTimer != null) {
+            prepTimer.cancel();
+            prepTimer = null;
+        }
+    }
+
     @Override
     protected void onResume() {
-        // TODO Buggy here. If home button pressed, Timer is reseted
-        // Better to put this under when SettingsActivity is called.
         super.onResume();
-//        if (proximity) {
-//            sensorManager.registerListener(this, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
-//        }
-//        if (workTimer != null) {
-//            workTimer.cancel();
-//            workTimer = null;
-//        }
-//        if (restTimer != null) {
-//            restTimer.cancel();
-//            restTimer = null;
-//        }
-//        if (prepTimer != null) {
-//            prepTimer.cancel();
-//            prepTimer = null;
-//        }
+        if (proximity) {
+            sensorManager.registerListener(this, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+//        cancelNullTimers();
 //        loadPreferences(sp);
 //        roundCurrent = 1;
 //        setRoundTextView();
@@ -252,6 +244,18 @@ public class MainActivity extends Activity implements SensorEventListener{
         if (proximity) {
             sensorManager.unregisterListener(this);
         }
+    }
+
+    @Override
+    public void finish() {
+        cancelNullTimers();
+        super.finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        finish();
+        super.onDestroy();
     }
 
     @Override
@@ -351,40 +355,70 @@ public class MainActivity extends Activity implements SensorEventListener{
     }
 
     private void setTextViewTimeColor(long millis) {
+//        if (!running) {
+//            textViewTime.setTextColor(Color.WHITE);
+//        } else if (running && state == State.WORK) {
+//            if (millis <= endRoundWarnMillis) {
+//                textViewTime.setTextColor(Color.YELLOW);
+//            } else
+//                textViewTime.setTextColor(Color.GREEN);
+//        } else if (running && state == State.REST) {
+//            if (millis <= prepTimeMillis) {
+//                textViewTime.setTextColor(Color.YELLOW);
+//            } else
+//                textViewTime.setTextColor(Color.RED);
+//        }
         if (!running) {
-            textViewTime.setTextColor(Color.WHITE);
+            timeLeftPanel.setBackgroundResource(R.drawable.timer_bg_gray);
         } else if (running && state == State.WORK) {
             if (millis <= endRoundWarnMillis) {
-                textViewTime.setTextColor(Color.YELLOW);
+                timeLeftPanel.setBackgroundResource(R.drawable.timer_bg_yellow);
             } else
-                textViewTime.setTextColor(Color.GREEN);
+                timeLeftPanel.setBackgroundResource(R.drawable.timer_bg_green);
         } else if (running && state == State.REST) {
             if (millis <= prepTimeMillis) {
-                textViewTime.setTextColor(Color.YELLOW);
+                timeLeftPanel.setBackgroundResource(R.drawable.timer_bg_yellow);
             } else
-                textViewTime.setTextColor(Color.RED);
+                timeLeftPanel.setBackgroundResource(R.drawable.timer_bg_red);
         }
     }
 
     private void setTextViewTimeColor() {
+//        if (!running) {
+//            textViewTime.setTextColor(Color.WHITE);
+//        } else if (running && state == State.WORK) {
+//            textViewTime.setTextColor(Color.GREEN);
+//        } else if (running && state == State.REST) {
+//            textViewTime.setTextColor(Color.RED);
+//        } else if (running && state == State.PREP) {
+//            textViewTime.setTextColor(Color.YELLOW);
+//        }
+
+        // Changes the background instead
         if (!running) {
-            textViewTime.setTextColor(Color.WHITE);
+            timeLeftPanel.setBackgroundResource(R.drawable.timer_bg_gray);
         } else if (running && state == State.WORK) {
-            textViewTime.setTextColor(Color.GREEN);
+            timeLeftPanel.setBackgroundResource(R.drawable.timer_bg_green);
         } else if (running && state == State.REST) {
-            textViewTime.setTextColor(Color.RED);
+            timeLeftPanel.setBackgroundResource(R.drawable.timer_bg_red);
         } else if (running && state == State.PREP) {
-            textViewTime.setTextColor(Color.YELLOW);
+            timeLeftPanel.setBackgroundResource(R.drawable.timer_bg_yellow);
         }
     }
 
     private void setTextViewTimeWarnPrep(long millis) {
         if (millis <= endRoundWarnMillis && state == State.WORK) {
-            textViewTime.setTextColor(Color.YELLOW);
+            timeLeftPanel.setBackgroundResource(R.drawable.timer_bg_yellow);
         }
         if (millis <= prepTimeMillis && state == State.REST) {
-            textViewTime.setTextColor(Color.YELLOW);
+            timeLeftPanel.setBackgroundResource(R.drawable.timer_bg_yellow);
         }
+//        if (millis <= endRoundWarnMillis && state == State.WORK) {
+//            textViewTime.setTextColor(Color.YELLOW);
+//        }
+//        if (millis <= prepTimeMillis && state == State.REST) {
+//            textViewTime.setTextColor(Color.YELLOW);
+//        }
     }
 
     private void loadPreferences(SharedPreferences sp) {
@@ -478,6 +512,9 @@ public class MainActivity extends Activity implements SensorEventListener{
                     playBellSoundVibrate();
                 }
             } else if (roundCurrent == roundsTotal) {
+
+                // TODO Allow to share number of rounds/total time worked out on FB, Twitter, G+
+
                 textViewTime.setText("DONE!");
                 state = State.DONE;
                 alertPlayed = false;
@@ -485,14 +522,7 @@ public class MainActivity extends Activity implements SensorEventListener{
                 setRoundTextView();
                 setTextViewTimeColor();
                 running = false;
-                if (restTimer != null) {
-                    restTimer.cancel();
-                    restTimer = null;
-                }
-                if (restTimer != null) {
-                    workTimer.cancel();
-                    workTimer = null;
-                }
+                cancelNullTimers();
                 ms = runTime;
             }
         }

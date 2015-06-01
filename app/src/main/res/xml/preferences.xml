@@ -2,10 +2,13 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
         android:title="Timer Settings">
+
+        <!-- TODO round time : Make it so that minimum is 10 secs -->
         <com.eightbitdreams.boxingintervaltimer.TimePreference
             android:key="round_time_key"
             android:title="@string/round_time_title"
             android:defaultValue="3:00" />
+        <!-- TODO rest time : Make it so that minimum is 10 secs -->
         <com.eightbitdreams.boxingintervaltimer.TimePreference
             android:key="rest_time_key"
             android:title="@string/rest_time_title"
@@ -21,6 +24,8 @@
             android:entries="@array/warn_time"
             android:entryValues="@array/warn_time_values"
             android:defaultValue="20" />
+
+        <!-- TODO : Use Number Picker to limit the number of rounds to 99 -->
         <EditTextPreference
             android:key="number_rounds_key"
             android:title="@string/num_round_title"
@@ -53,6 +58,10 @@
             <!--android:title="Email Developer"-->
             <!--android:summary="Send bug report via email">-->
         <!--</PreferenceScreen>-->
+        <Preference
+            android:key="version"
+            android:title="Version 0.1.1-beta"/>
+
 
     </PreferenceCategory>
 </PreferenceScreen>

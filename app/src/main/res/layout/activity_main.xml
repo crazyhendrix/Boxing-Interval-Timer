@@ -9,7 +9,9 @@
     android:orientation="vertical"
     android:keepScreenOn="true"
     tools:context=".MainActivity">
-
+    <!-- TODO Admob : Add ads on the top of the app -->
+    <!-- TODO LandScape Mode -->
+    <!-- TODO Stats and days used -->
     <LinearLayout
         android:id="@+id/round_panel"
         android:layout_centerHorizontal="true"
@@ -29,6 +31,26 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <!-- TODO Change Font Family for app -->
+        <TextView
+            android:id="@+id/work_preview_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="work: 3:00"
+            android:layout_weight="1"
+            android:paddingLeft="20dp"/>
+        <TextView
+            android:id="@+id/rest_preview_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="rest: 1:00"
+            android:paddingRight="20dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/time_panel"
         android:layout_below="@+id/round_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -36,7 +58,7 @@
         <TextView
             android:id="@+id/time_left_textView"
             android:textSize="120dp"
-            android:textColor="#ffffff"
+            android:textColor="#000000"
             android:text="@string/initial_time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
