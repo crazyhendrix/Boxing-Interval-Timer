@@ -33,3 +33,7 @@ exercises that uses intervals.
 ## Permission ##
 
 - Requires Android 4.0.3 and above.
+
+## Test from Z3 mobile sGit ##
+
+Testing from mobile phone
