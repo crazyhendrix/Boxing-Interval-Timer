@@ -25,8 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 
 public class MainActivity extends Activity implements SensorEventListener{
-    private TextView textViewTime;
-    private TextView textViewRounds;
+    private TextView textViewTime, textViewRounds, textViewWorkPreview, textViewRestPreview;
     private LinearLayout timeLeftPanel;
     private Button buttonRun, buttonReset, buttonSettings;
     private boolean running = false, prep;
@@ -119,6 +118,10 @@ public class MainActivity extends Activity implements SensorEventListener{
         soundBellId = soundPool.load(this, R.raw.bit_bell, 1);
 
         roundCurrent = 1;
+
+        // Preview work time and rest time settings
+        textViewRestPreview = (TextView) findViewById(R.id.rest_preview_text);
+        textViewWorkPreview = (TextView) findViewById(R.id.work_preview_text);
 
         // Load shared preferences
         loadPreferences(sp);
@@ -430,6 +433,8 @@ public class MainActivity extends Activity implements SensorEventListener{
         roundsTotal = Integer.parseInt(sp.getString("number_rounds_key", "12"));
         workTimeMillis = TimePreference.getMillis(sp.getString("round_time_key", "3:00"));
         restTimeMillis = TimePreference.getMillis(sp.getString("rest_time_key", "1:00"));
+        textViewWorkPreview.setText("Work: " + sp.getString("round_time_key", "work time"));
+        textViewRestPreview.setText("Rest: " + sp.getString("rest_time_key", "rest time"));
         mute = sp.getBoolean("mute_key", false);
         intervalMillis = 1000;
         alertPlayed = false;

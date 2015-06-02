@@ -9,6 +9,7 @@ import android.preference.PreferenceActivity;
  * Created by "8-Bit Dreams" on 29/5/15.
  */
 public class SettingsActivity extends PreferenceActivity {
+    private boolean sendingMail = false;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,15 +25,24 @@ public class SettingsActivity extends PreferenceActivity {
                 mailto.putExtra(Intent.EXTRA_SUBJECT,"Boxing Interval Timer");
                 mailto.putExtra(Intent.EXTRA_TEXT,"");
                 startActivity(Intent.createChooser(mailto, "Select email application."));
+                sendingMail = true;
                 return true;
             }
         });
     }
 
     @Override
+    protected void onResume() {
+        sendingMail = false;
+        super.onResume();
+    }
+
+    @Override
     protected void onStop() {
-        Intent i = new Intent(this, MainActivity.class);
-        startActivity(i);
+        if (!sendingMail) {
+            Intent i = new Intent(this, MainActivity.class);
+            startActivity(i);
+        }
         super.onStop();
     }
 }
